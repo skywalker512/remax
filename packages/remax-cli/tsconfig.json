@@ -5,7 +5,11 @@
     "target": "ES2017",
     "declaration": true,
     "outDir": "lib",
-    "rootDirs": ["src", "tests"]
+    "rootDirs": ["src", "tests"],
+    "types": ["@types/jest"],
+    "jsx": "preserve",
+    "skipLibCheck": true,
+    "resolveJsonModule": true
   },
-  "exclude": ["tests", "lib", "**/__tests__"]
+  "exclude": ["tests", "lib"]
 }

@@ -4,9 +4,11 @@
   "version": "1.0.0",
   "scripts": {
     "watch": "lerna run watch --parallel",
-    "build": "lerna run build --ignore website",
-    "test": "lerna run --scope remax --scope remax-cli --stream test",
-    "test:cov": "lerna run --scope remax --scope remax-cli --stream test -- --collect-coverage",
+    "prebuild": "lerna run build --scope remax-types && lerna run build --scope remax-alipay && lerna run build --scope remax-wechat && lerna run build --scope remax-toutiao",
+    "build": "lerna run build --scope remax.macro && lerna run build --scope remax && lerna run build --scope babel-preset-remax && lerna run build --scope remax-cli && lerna run build --scope umi-plugin-remax",
+    "test": "lerna run --ignore babel-preset-remax --ignore website --ignore umi-plugin-remax --stream test",
+    "test:integration": "./scripts/integration-test",
+    "test:cov": "lerna run --ignore babel-preset-remax --ignore website --ignore umi-plugin-remax --stream test -- --collect-coverage",
     "clean": "lerna clean",
     "readme:copy": "lerna exec 'cp ../../README.md' . --scope remax --scope remax-cli",
     "readme:clean": "lerna exec 'rm README.md' --scope remax --scope remax-cli",
@@ -14,7 +16,7 @@
     "postpack": "npm run readme:clean",
     "postinstall": "lerna bootstrap",
     "lint": "eslint \"packages/*/src/**/*.{ts,tsx}\"",
-    "prerelease": "npm run lint && npm run test && lerna exec -- rm -rf lib && lerna run build",
+    "prerelease": "./scripts/prerelease",
     "release": "lerna publish --force-publish --create-release=github",
     "site:build": "lerna run --scope website --stream build",
     "site:deploy": "lerna run --scope website --stream deploy",
@@ -23,16 +25,16 @@
   "dependencies": {
     "@commitlint/cli": "^8.1.0",
     "@commitlint/config-conventional": "^8.1.0",
-    "@typescript-eslint/eslint-plugin": "^2.0.0",
-    "@typescript-eslint/parser": "^2.0.0",
+    "@typescript-eslint/eslint-plugin": "^2.12.0",
+    "@typescript-eslint/parser": "^2.12.0",
     "eslint": "^6.2.1",
     "eslint-config-prettier": "^6.1.0",
     "eslint-plugin-prettier": "^3.1.0",
     "eslint-plugin-react": "^7.14.3",
     "husky": "^3.0.2",
     "lerna": "^3.4.3",
-    "prettier": "^1.18.2",
-    "typescript": "^3.5.3"
+    "prettier": "^1.19.1",
+    "typescript": "^3.7.3"
   },
   "husky": {
     "hooks": {

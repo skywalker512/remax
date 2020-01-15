@@ -17,11 +17,15 @@ module.exports = {
   // 是否显示 build 进度，默认显示
   progress: true,
   // 指定代码的根目录，默认 src
-  rootDir: 'src,
+  rootDir: 'src',
   // build 目录，默认 dist
   output: 'dist',
   // 配置路径别名
   alias: {},
+  // 是否开启 wxml/axml 文件压缩
+  compressTemplate: process.env.NODE_ENV === 'production',
+  // 是否将 px 转换为 rpx, 默认是 true
+  pxToRpx: true,
   postcss: {
     options: {
       use: [
@@ -40,8 +44,19 @@ module.exports = {
         ['stylus', {}],
       ],
     },
+    url: {
+      // 是否自动将图片转换成 base64
+      inline: false,
+      // 转换图片的最大限制， 单位 KB
+      maxSize: 8,
+    },
     // 其他postcss 插件, 会和默认的插件进行拼接
     plugins: [],
+  },
+  // 修改 rollup 的配置
+  rollupOptions: options => {
+    options.input.push('foo.js');
+    return options;
   },
 };
 ```
@@ -62,14 +77,38 @@ _关于 css modules 和样式更多信息，请参考 [指南 - 样式](/guide/s
 
 ### babel 配置
 
-Remax 支持直接在项目根目录创建 .babelrc 文件来自定义 babel 配置，例如：
+Remax 支持直接在项目根目录创建 babel.config.js 文件来自定义 babel 配置，例如：
 
 ```js
-// .babelrc
-{
-  "plugins": ["loop-optimizer"],
-}
+// babel.config.js
+module.exports = {
+  plugins: ['loop-optimizer'],
+  presets: [
+    [
+      'remax',
+      {
+        // 是否使用 @babel/preset-typescript 转换TS代码
+        typescript: true,
+
+        // 例子：下面的 `decorators` 和 `classProperties` 可以使Mobx的装饰器能正常工作
+        // @babel/plugin-proposal-decorators 的选项，详见 https://babeljs.io/docs/en/babel-plugin-proposal-decorators
+        decorators: {
+          legacy: true,
+        },
+
+        // @babel/plugin-proposal-class-properties 的选项，详见 https://babeljs.io/docs/en/babel-plugin-proposal-class-properties
+        classProperties: {
+          loose: true,
+        },
+      },
+    ],
+  ],
+};
 ```
+
+_由于 babel7 的推荐以及项目目录配置等问题，请使用 [babel.config.js](https://babeljs.io/docs/en/configuration#babelconfigjs) 文件而不是 .babelrc_
+
+_记得安装 `babel-preset-remax`，并将它加入到 presets 配置中_
 
 ### 路径别名
 
@@ -149,6 +188,15 @@ exports.alipay = {
 
 `app.config.js` 对应小程序 `app.json`，页面配置为对应页面的 `config.js`，如，`pages/index/index.js` 的页面配置为 `pages/index/index.config.js`
 
-> 注意
->
-> 由于微信不支持模板递归，因此在 Remax 中对层级深度有一定限制。如果开发者的小程序页面层级较深，可以通过 **UNSAFE_wechatTemplateDepth** 来控制层级，Remax 默认层级为 20。需要注意的是，层级越深，Remax 打包结果的大小增长越快
+config 同样支持 TypeScript：
+
+```js
+// app.config.ts
+import { AppConfig } from 'remax/wechat';
+const config: AppConfig = {
+ navigationBarTitleText: '标题',
+ ...
+}
+
+export default config;
+```

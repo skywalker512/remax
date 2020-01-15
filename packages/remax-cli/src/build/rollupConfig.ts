@@ -1,59 +1,57 @@
 import { RollupOptions, RollupWarning } from 'rollup';
+import API from '../API';
+import { output } from './utils/output';
 import path from 'path';
-import resolve from 'rollup-plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
-import babel from 'rollup-plugin-babel';
-import url from 'rollup-plugin-url';
-import json from 'rollup-plugin-json';
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+import babel from './plugins/babel';
+import url from '@remax/rollup-plugin-url';
+import json from '@rollup/plugin-json';
 import postcss from '@remax/rollup-plugin-postcss';
 import postcssUrl from './plugins/postcssUrl';
 import progress from 'rollup-plugin-progress';
 import clean from 'rollup-plugin-delete';
-import inject from 'rollup-plugin-inject';
 import copy from 'rollup-plugin-copy';
 import stub from './plugins/stub';
 import pxToUnits from '@remax/postcss-px2units';
 import getEntries from '../getEntries';
 import getCssModuleConfig from '../getCssModuleConfig';
-import template from './plugins/template';
-import components from './plugins/components';
 import page from './plugins/page';
 import removeSrc from './plugins/removeSrc';
-import removeConfig from './plugins/removeConfig';
 import rename from './plugins/rename';
-import replace from 'rollup-plugin-replace';
-import { RemaxOptions } from '../getConfig';
+import replace from '@rollup/plugin-replace';
+import { RemaxOptions } from 'remax-types';
 import app from './plugins/app';
-import removeESModuleFlag from './plugins/removeESModuleFlag';
-import adapters, { Adapter } from './adapters';
 import { Context, Env } from '../types';
 import namedExports from 'named-exports-db';
 import fixRegeneratorRuntime from './plugins/fixRegeneratorRuntime';
-import nativeComponents from './plugins/nativeComponents/index';
 import nativeComponentsBabelPlugin from './plugins/nativeComponents/babelPlugin';
+import nativeComponents from './plugins/nativeComponents';
+import components from './plugins/components';
+import template from './plugins/template';
 import alias from './plugins/alias';
 import extensions from '../extensions';
 import { without } from 'lodash';
 import jsx from 'acorn-jsx';
+import stringifyHostComponents from './stringifyHostComponents';
 
 export default function rollupConfig(
   options: RemaxOptions,
   argv: any,
-  adapter: Adapter,
   context?: Context
 ) {
   const stubModules: string[] = [];
 
-  adapters.forEach(name => {
-    if (adapter.name !== name) {
-      const esmPackage = `remax/esm/adapters/${name}`;
-      const cjsPackage = `remax/cjs/adapters/${name}`;
+  ['wechat', 'alipay', 'toutiao'].forEach(name => {
+    if (API.adapter.name !== name) {
+      const esmPackage = `${name}/esm`;
+      const cjsPackage = `${name}/cjs`;
       stubModules.push(esmPackage);
       stubModules.push(cjsPackage);
     }
   });
 
-  const entries = getEntries(options, adapter, context);
+  const entries = getEntries(options, context);
   const cssModuleConfig = getCssModuleConfig(options.cssModules);
 
   // 获取 postcss 配置
@@ -67,6 +65,8 @@ export default function rollupConfig(
     NODE_ENV: process.env.NODE_ENV || 'development',
     REMAX_PLATFORM: argv.target,
     REMAX_DEBUG: process.env.REMAX_DEBUG,
+    REMAX_PX2RPX: `${options.pxToRpx}`,
+    REMAX_HOST_COMPONENTS: () => stringifyHostComponents(),
   };
 
   Object.keys(process.env).forEach(k => {
@@ -93,6 +93,7 @@ export default function rollupConfig(
       sourceDir: path.resolve(options.cwd, options.rootDir),
       include: ['**/*.svg', '**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.gif'],
     }),
+    json(),
     resolve({
       dedupe: [
         'react',
@@ -116,37 +117,37 @@ export default function rollupConfig(
       modules: stubModules,
     }),
     babel({
-      babelrc: false,
-      include: entries.pages.map(p => p.file),
+      include: entries.pages,
       extensions: without(extensions, '.json'),
-      plugins: [nativeComponentsBabelPlugin(options, adapter), page],
-      presets: [[require.resolve('babel-preset-remax'), { react: false }]],
+      usePlugins: [nativeComponentsBabelPlugin(options), page],
+      reactPreset: false,
     }),
     babel({
-      babelrc: false,
       include: entries.app,
       extensions: without(extensions, '.json'),
-      plugins: [nativeComponentsBabelPlugin(options, adapter), app],
-      presets: [[require.resolve('babel-preset-remax'), { react: false }]],
+      usePlugins: [nativeComponentsBabelPlugin(options), app],
+      reactPreset: false,
     }),
     babel({
       extensions: without(extensions, '.json'),
-      plugins: [
-        nativeComponentsBabelPlugin(options, adapter),
-        components(adapter),
-      ],
-      presets: [require.resolve('babel-preset-remax')],
+      usePlugins: [nativeComponentsBabelPlugin(options), components()],
+      reactPreset: true,
     }),
     postcss({
       extract: true,
       ...postcssConfig.options,
       modules: cssModuleConfig,
-      plugins: [pxToUnits(), postcssUrl(options)].concat(postcssConfig.plugins),
+      plugins: [options.pxToRpx && pxToUnits(), postcssUrl(options)]
+        .filter(Boolean)
+        .concat(postcssConfig.plugins),
     }),
-    json({}),
     replace({
       values: Object.keys(envReplacement).reduce((acc: any, key) => {
-        acc[`process.env.${key}`] = JSON.stringify(envReplacement[key]);
+        if (typeof envReplacement[key] === 'function') {
+          acc[`process.env.${key}`] = envReplacement[key];
+        } else {
+          acc[`process.env.${key}`] = JSON.stringify(envReplacement[key]);
+        }
         return acc;
       }, {}),
     }),
@@ -173,15 +174,11 @@ export default function rollupConfig(
           cssModuleConfig.globalModulePaths.some(reg => reg.test(input)) ||
           input.indexOf('app.css') !== -1
         ) {
-          return input.replace(/\.css/, adapter.extensions.style);
+          return input.replace(/\.css/, API.getMeta().style);
         }
 
         return input.replace(/\.css/, '.css.js');
       },
-    }),
-    inject({
-      exclude: 'node_modules/**',
-      regeneratorRuntime: 'regenerator-runtime',
     }),
     rename({
       matchAll: true,
@@ -204,11 +201,9 @@ export default function rollupConfig(
       },
     }),
     removeSrc(options),
-    removeConfig(),
-    removeESModuleFlag(),
     fixRegeneratorRuntime(),
-    template(options, adapter, context),
-    nativeComponents(options, adapter),
+    nativeComponents(options, entries.pages),
+    template(options, context),
   ];
 
   /* istanbul ignore next */
@@ -219,17 +214,17 @@ export default function rollupConfig(
   if (process.env.NODE_ENV === 'production') {
     plugins.unshift(
       clean({
-        targets: ['dist/*', '!.tea'],
+        targets: [path.join(options.output, '*'), '!.tea'],
       })
     );
   }
 
-  const config: RollupOptions = {
-    ...options.rollupOptions,
-    input: [entries.app, ...entries.pages.map(p => p.file), ...entries.images],
+  let config: RollupOptions = {
+    treeshake: process.env.NODE_ENV === 'production',
+    input: [entries.app, ...entries.pages, ...entries.images],
     output: {
       dir: options.output,
-      format: adapter.moduleFormat,
+      format: 'cjs',
       exports: 'named',
       sourcemap: false,
       extend: true,
@@ -240,11 +235,29 @@ export default function rollupConfig(
     /* istanbul ignore next */
     onwarn(warning, warn) {
       if ((warning as RollupWarning).code === 'THIS_IS_UNDEFINED') return;
-      if ((warning as RollupWarning).code === 'CIRCULAR_DEPENDENCY') return;
-      warn(warning);
+      if ((warning as RollupWarning).code === 'CIRCULAR_DEPENDENCY') {
+        output('⚠️ 检测到循环依赖，如果不影响项目运行，请忽略', 'yellow');
+      }
+
+      if (!warning.message) {
+        output(
+          `⚠️ ${warning.code}:${warning.plugin || ''} ${(warning as any).text}`,
+          'yellow'
+        );
+      } else {
+        output('⚠️ ' + warning.toString(), 'yellow');
+      }
     },
     plugins,
   };
+
+  if (typeof options.rollupOptions === 'function') {
+    config = options.rollupOptions(config);
+  } else if (options.rollupOptions) {
+    config = { ...config, ...options.rollupOptions };
+  }
+
+  config = API.extendsRollupConfig({ rollupConfig: config });
 
   return config;
 }

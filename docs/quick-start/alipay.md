@@ -5,6 +5,8 @@ order: 2
 
 让我们在一分钟内开启一个支付宝小程序项目吧！
 
+> 钉钉小程序直接使用支付宝模式即可
+
 ## 创建项目
 
 ```bash
@@ -49,25 +51,7 @@ my-app/
 
 `src` 为源文件目录
 
-`app.js` 即小程序 App 方法，可以在 class 内定义对应的属性
-
-```js
-import './app.css';
-
-class App {
-  onLaunch (options) {
-  },
-  onShow (options) {
-  },
-  onHide () {
-  },
-  onError (msg) {
-    console.log(msg)
-  },
-}
-
-export default App;
-```
+`app.js` 入口文件，具体可参考 [指南 - 框架](/guide/framework)
 
 `app.css` 全局样式文件
 
@@ -102,7 +86,7 @@ export default () => {
 
 _默认导出的的 React 组件就是当前的页面，关于生命周期的使用方式参考 [指南 - 生命周期](/guide/lifecycle)_
 
-_Remax 针对不同平台有对应的实现，如 `remax/alipay`，`remax/wechat` 等等，开发者可根据需要选择对应的平台。关于跨平台开发解决方案请查看：[高级指南 - 跨平台开发](/advanced-guide/cross-platform)。_
+_Remax 针对不同平台有对应的实现，如 `remax/alipay`，`remax/wechat`，`remax/toutiao` 等等，开发者可根据需要选择对应的平台。关于跨平台开发解决方案请查看：[高级指南 - 跨平台开发](/advanced-guide/cross-platform)。_
 
 `index.module.css` 页面样式文件，关于样式请参考 [指南 - 样式](/guide/style)
 

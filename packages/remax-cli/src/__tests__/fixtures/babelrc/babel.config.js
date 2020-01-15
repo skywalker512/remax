@@ -3,6 +3,21 @@ module.exports = function(api) {
 
   return {
     plugins: ['loop-optimizer'],
-    presets: ['remax']
-  }
-}
+    presets: [
+      [
+        'remax',
+        {
+          typescript: {
+            allowNamespaces: true,
+          },
+          'class-properties': {
+            loose: true,
+          },
+          decorators: {
+            legacy: true,
+          },
+        },
+      ],
+    ],
+  };
+};

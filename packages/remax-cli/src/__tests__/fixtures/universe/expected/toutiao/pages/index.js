@@ -2,13 +2,11 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
-
 var _rollupPluginBabelHelpers = require('../_virtual/_rollupPluginBabelHelpers.js');
 var React = require('react');
-var React__default = _interopDefault(React);
 var createPageConfig = require('../npm/remax/esm/createPageConfig.js');
 require('../npm/remax/esm/index.js');
+var runtime = require('../npm/regenerator-runtime/runtime.js');
 var View = require('../components/View.js');
 var Text = require('../components/Text.js');
 
@@ -16,7 +14,30 @@ var _page = function _page() {
   var props = {};
   var TextElement = React.cloneElement(React.createElement(Text.default, null));
 
-  function handleClick() {}
+  function handleClick() {
+    return _handleClick.apply(this, arguments);
+  }
+
+  function _handleClick() {
+    _handleClick = _rollupPluginBabelHelpers.asyncToGenerator(
+    /*#__PURE__*/
+    runtime.default.mark(function _callee() {
+      return runtime.default.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              _context.next = 2;
+              return Promise.resolve(1);
+
+            case 2:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee);
+    }));
+    return _handleClick.apply(this, arguments);
+  }
 
   function handleTouchStart() {}
 

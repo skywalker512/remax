@@ -1,43 +1,66 @@
-import '../npm/remax/esm/render.js';
-import { createElement } from 'react';
-import '../npm/remax/esm/createAppConfig.js';
-import createPageConfig from '../npm/remax/esm/createPageConfig.js';
-import '../npm/remax/esm/index.js';
-import '../npm/remax/esm/adapters/alipay/components/propsAlias.js';
-import View from '../npm/remax/esm/adapters/alipay/components/View.js';
-import '../npm/remax/esm/adapters/alipay/components/ScrollView.js';
-import '../npm/remax/esm/adapters/alipay/components/Swiper.js';
-import '../npm/remax/esm/adapters/alipay/components/SwiperItem.js';
-import '../npm/remax/esm/adapters/alipay/components/MovableView.js';
-import '../npm/remax/esm/adapters/alipay/components/MovableArea.js';
-import '../npm/remax/esm/adapters/alipay/components/CoverView.js';
-import '../npm/remax/esm/adapters/alipay/components/CoverImage.js';
-import '../npm/remax/esm/adapters/alipay/components/Icon.js';
-import '../npm/remax/esm/adapters/alipay/components/Text.js';
-import '../npm/remax/esm/adapters/alipay/components/RichText.js';
-import '../npm/remax/esm/adapters/alipay/components/Progress.js';
-import '../npm/remax/esm/adapters/alipay/components/Button.js';
-import '../npm/remax/esm/adapters/alipay/components/CheckboxGroup.js';
-import '../npm/remax/esm/adapters/alipay/components/Checkbox.js';
-import '../npm/remax/esm/adapters/alipay/components/Form.js';
-import '../npm/remax/esm/adapters/alipay/components/Input.js';
-import '../npm/remax/esm/adapters/alipay/components/Label.js';
-import '../npm/remax/esm/adapters/alipay/components/Picker.js';
-import '../npm/remax/esm/adapters/alipay/components/PickerView.js';
-import '../npm/remax/esm/adapters/alipay/components/PickerViewColumn.js';
-import '../npm/remax/esm/adapters/alipay/components/RadioGroup.js';
-import '../npm/remax/esm/adapters/alipay/components/Radio.js';
-import '../npm/remax/esm/adapters/alipay/components/Slider.js';
-import '../npm/remax/esm/adapters/alipay/components/Switch.js';
-import '../npm/remax/esm/adapters/alipay/components/TextArea.js';
-import '../npm/remax/esm/adapters/alipay/components/Navigator.js';
-import '../npm/remax/esm/adapters/alipay/components/Image.js';
-import '../npm/remax/esm/adapters/alipay/components/Map.js';
-import '../npm/remax/esm/adapters/alipay/components/Canvas.js';
-import '../npm/remax/esm/adapters/alipay/components/WebView.js';
-import '../npm/remax/esm/adapters/alipay/components/Lifestyle.js';
-import '../npm/remax/esm/adapters/alipay/components/ContactButton.js';
-import '../npm/remax/esm/adapters/alipay/api.js';
+'use strict';
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+require('../npm/remax/esm/render.js');
+var React = require('react');
+var _rollupPluginBabelHelpers = require('../_virtual/_rollupPluginBabelHelpers.js');
+require('../npm/remax/esm/createAppConfig.js');
+require('../npm/remax/esm/createHostComponent.js');
+require('../npm/remax/esm/Platform.js');
+var createPageConfig = require('../npm/remax/esm/createPageConfig.js');
+var createNativeComponent = require('../npm/remax/esm/createNativeComponent.js');
+require('../npm/remax/esm/index.js');
+var index$2 = require('../npm/remax/npm/remax-alipay/esm/hostComponents/View/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/ScrollView/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/Swiper/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/SwiperItem/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/MovableView/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/MovableArea/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/CoverView/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/CoverImage/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/Icon/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/Text/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/RichText/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/Progress/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/Button/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/CheckboxGroup/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/Checkbox/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/Form/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/Input/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/Label/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/Picker/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/PickerView/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/PickerViewColumn/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/RadioGroup/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/Radio/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/Slider/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/Switch/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/Textarea/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/Navigator/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/Image/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/Map/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/Canvas/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/WebView/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/Lifestyle/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/ContactButton/index.js');
+require('../npm/remax/npm/remax-alipay/esm/hostComponents/Video/index.js');
+require('../npm/remax/npm/remax-alipay/esm/api/index.js');
+
+var A = createNativeComponent.default('a-0');
+
+var _class, _descriptor, _temp;
+
+var N;
+
+(function (_N) {
+  var V = _N.V = 1;
+})(N || (N = {})); // eslint-disable-next-line @typescript-eslint/no-namespace
+
+
+(function (_N2) {
+  var W = _N2.W = V;
+})(N || (N = {}));
 
 function timesTwo(arr) {
   var _a = arr;
@@ -55,10 +78,30 @@ function timesTwo(arr) {
   return _r;
 }
 
+function readonly(target, name, descriptor) {
+  descriptor.writable = false;
+  return descriptor;
+}
+
+var C = (_class = (_temp = function C() {
+  _rollupPluginBabelHelpers.classCallCheck(this, C);
+
+  _rollupPluginBabelHelpers.initializerDefineProperty(this, "p", _descriptor, this);
+}, _temp), _descriptor = _rollupPluginBabelHelpers.applyDecoratedDescriptor(_class.prototype, "p", [readonly], {
+  configurable: true,
+  enumerable: true,
+  writable: true,
+  initializer: function initializer() {
+    return 'p';
+  }
+}), _class);
+var c = new C();
+c.p = 'a';
+
 var _page = function _page() {
-  return createElement(View, null, timesTwo([1, 2, 3]));
+  return React.createElement(index$2.default, null, timesTwo([1, 2, 3]), N.V, N.W, c.p, React.createElement(A, null));
 };
 
-var index = Page(createPageConfig(_page));
+var index = Page(createPageConfig.default(_page));
 
-export default index;
+exports.default = index;

@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TextArea render correctly 1`] = `
+<textarea
+  className="class"
+  fixed={false}
+  maxlength={-1}
+  selectionEnd={999}
+  selectionStart={999}
+  value=""
+/>
+`;

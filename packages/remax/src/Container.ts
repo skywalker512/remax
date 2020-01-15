@@ -1,6 +1,10 @@
 import VNode, { Path, RawNode } from './VNode';
 import { generate } from './instanceId';
+import { generate as generateActionId } from './actionId';
 import { FiberRoot } from 'react-reconciler';
+import propsAlias from './propsAlias';
+import nativeEffector from './nativeEffect';
+import Platform from './Platform';
 
 function stringPath(path: Path) {
   return path.join('.');
@@ -19,6 +23,7 @@ export default class Container {
   updateQueue: SpliceUpdate[] = [];
   _rootContainer?: FiberRoot;
   stopUpdate?: boolean;
+  rendered = false;
 
   constructor(context: any) {
     this.context = context;
@@ -31,6 +36,16 @@ export default class Container {
     this.root.mounted = true;
   }
 
+  normalizeRawNode = (item: RawNode): RawNode => {
+    return {
+      ...item,
+      props: propsAlias(item.props, item.type),
+      children: item.children
+        ? item.children.map(this.normalizeRawNode)
+        : item.children,
+    };
+  };
+
   requestUpdate(
     path: Path,
     start: number,
@@ -42,7 +57,7 @@ export default class Container {
       path,
       start,
       deleteCount,
-      items,
+      items: items.map(this.normalizeRawNode),
     };
     if (immediately) {
       this.updateQueue.push(update);
@@ -62,7 +77,44 @@ export default class Container {
 
     const startTime = new Date().getTime();
 
-    const action = {
+    if (
+      typeof this.context.$batchedUpdates === 'function' &&
+      typeof this.context.$spliceData === 'function'
+    ) {
+      this.context.$batchedUpdates(() => {
+        this.updateQueue.map((update, index) => {
+          let callback = undefined;
+          if (index + 1 === this.updateQueue.length) {
+            callback = () => {
+              nativeEffector.run();
+              /* istanbul ignore next */
+              if (process.env.REMAX_DEBUG) {
+                console.log(
+                  `setData => 回调时间：${new Date().getTime() - startTime}ms`
+                );
+              }
+            };
+          }
+          this.context.$spliceData(
+            {
+              [update.path.join('.')]: [
+                update.start,
+                update.deleteCount,
+                ...update.items,
+              ],
+            },
+            callback
+          );
+        });
+      });
+
+      this.updateQueue = [];
+
+      return;
+    }
+
+    // TODO 统一更新行为
+    let action: any = {
       type: 'splice',
       payload: this.updateQueue.map(update => ({
         path: stringPath(update.path),
@@ -70,29 +122,42 @@ export default class Container {
         deleteCount: update.deleteCount,
         item: update.items[0],
       })),
+      id: generateActionId(),
     };
 
-    let tree: typeof action | { root: RawNode } = action;
-
-    if (process.env.REMAX_PLATFORM === 'toutiao') {
-      tree = {
-        root: this.root.toJSON(),
+    if (Platform.isToutiao) {
+      action = {
+        root: this.normalizeRawNode(this.root.toJSON()),
       };
     }
 
-    this.context.setData({ action: tree }, () => {
-      if (process.env.REMAX_DEBUG) {
-        console.log(
-          `setData => 回调时间：${new Date().getTime() - startTime}ms`,
-          action
-        );
+    this.context.setData(
+      {
+        action,
+      },
+      () => {
+        nativeEffector.run();
+        /* istanbul ignore next */
+        if (process.env.REMAX_DEBUG) {
+          console.log(
+            `setData => 回调时间：${new Date().getTime() - startTime}ms`,
+            action
+          );
+        }
       }
-    });
+    );
+
     this.updateQueue = [];
   }
 
   clearUpdate() {
     this.stopUpdate = true;
+
+    if (Platform.isWechat) {
+      this.context.setData({
+        action: { type: 'clear' },
+      });
+    }
   }
 
   createCallback(name: string, fn: Function) {

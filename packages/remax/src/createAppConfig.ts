@@ -3,6 +3,7 @@ import render from './render';
 import AppContainer from './AppContainer';
 import isClass from './utils/isClass';
 import isClassComponent from './utils/isClassComponent';
+import { ForwardRef } from './ReactIs';
 
 class DefaultAppComponent extends React.Component {
   render() {
@@ -10,54 +11,57 @@ class DefaultAppComponent extends React.Component {
   }
 }
 
+enum AppLifecyle {
+  onLaunch = 'onLaunch',
+  onShow = 'onShow',
+  onHide = 'onHide',
+  onError = 'onError',
+  onShareAppMessage = 'onShareAppMessage',
+  onPageNotFound = 'onPageNotFound',
+}
+
 export default function createAppConfig(this: any, App: any) {
   const createConfig = (
-    AppComponent: React.ComponentType = DefaultAppComponent
+    AppComponent: React.ComponentType<any> = DefaultAppComponent
   ) => {
-    return {
+    const config = {
       _container: new AppContainer(this),
 
       _pages: [] as any[],
 
-      _instance: null as any,
+      _instance: React.createRef<any>(),
 
       onLaunch(options: any) {
-        this._instance = this._render();
+        this._render();
 
-        if (this._instance && this._instance.onLaunch) {
-          this._instance.onLaunch(options);
-        }
+        this.callLifecycle(AppLifecyle.onLaunch, options);
       },
 
       onShow(options: any) {
-        if (this._instance && this._instance.onShow) {
-          this._instance.onShow(options);
-        }
+        this.callLifecycle(AppLifecyle.onShow, options);
       },
 
       onHide() {
-        if (this._instance && this._instance.onHide) {
-          this._instance.onHide();
-        }
+        this.callLifecycle(AppLifecyle.onHide);
       },
 
       onError(error: any) {
-        if (this._instance && this._instance.onError) {
-          this._instance.onError(error);
-        }
+        this.callLifecycle(AppLifecyle.onError, error);
       },
 
       // 支付宝
-      onShareAppMessage() {
-        if (this._instance && this._instance.onShareAppMessage) {
-          return this._instance.onShareAppMessage();
-        }
+      onShareAppMessage(options: any) {
+        this.callLifecycle(AppLifecyle.onShareAppMessage, options);
       },
 
       // 微信
       onPageNotFound(options: any) {
-        if (this._instance && this._instance.onPageNotFound) {
-          return this._instance.onPageNotFound(options);
+        this.callLifecycle(AppLifecyle.onPageNotFound, options);
+      },
+
+      callLifecycle(lifecycle: AppLifecyle, ...args: any[]) {
+        if (this._instance.current && this._instance.current[lifecycle]) {
+          return this._instance.current[lifecycle](...args);
         }
       },
 
@@ -72,16 +76,27 @@ export default function createAppConfig(this: any, App: any) {
       },
 
       _render() {
+        const props: any = {};
+
+        if (
+          isClassComponent(AppComponent) ||
+          (AppComponent as any).$$typeof === ForwardRef
+        ) {
+          props.ref = this._instance;
+        }
+
         return render(
           React.createElement(
             AppComponent,
-            null,
+            props,
             this._pages.map(p => p.element)
           ),
           this._container
         );
       },
     };
+
+    return config;
   };
 
   // 兼容老的写法

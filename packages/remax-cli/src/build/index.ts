@@ -1,17 +1,10 @@
 import * as rollup from 'rollup';
-import esm from 'esm';
+import API from '../API';
 import rollupConfig from './rollupConfig';
 import getConfig from '../getConfig';
 import { Context } from '../types';
 import runWatcher from './watcher';
 import { output } from './utils/output';
-
-// eslint-disable-next-line
-require = esm(module, {
-  cjs: {
-    dedefault: true,
-  },
-});
 
 export default async (argv: any, context?: Context) => {
   const options = {
@@ -19,27 +12,26 @@ export default async (argv: any, context?: Context) => {
     ...(context ? context.config : {}),
   };
 
-  let targetConfig;
-  try {
-    targetConfig = require(`./adapters/${argv.target}`);
-  } catch (e) {
-    throw new Error(`Target ${argv.target} is not supported yet.`);
-  }
+  API.registerAdapterPlugins(argv.target);
 
   const rollupOptions: rollup.RollupOptions = rollupConfig(
     options,
     argv,
-    targetConfig,
     context
   );
 
   if (argv.watch) {
     runWatcher(options, rollupOptions, argv, context);
+    try {
+      require('remax-stats').run();
+    } catch (e) {
+      // ignore
+    }
   } else {
     try {
       output('🚀 开始 build...', 'blue');
       const bundle = await rollup.rollup(rollupOptions);
-      await bundle.write(rollupOptions.output!);
+      await bundle.write(rollupOptions.output as rollup.OutputOptions);
       output('💡 完成', 'green');
     } catch (error) {
       const name = error.code === 'PLUGIN_ERROR' ? error.plugin : error.code;

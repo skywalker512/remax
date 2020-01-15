@@ -3,49 +3,68 @@ import { parse } from 'acorn';
 import { Plugin, OutputChunk } from 'rollup';
 import { sortBy } from 'lodash';
 import { getComponents } from './components';
+import { RemaxOptions, Meta } from 'remax-types';
 import ejs from 'ejs';
-import { RemaxOptions } from '../../getConfig';
+import API from '../../API';
+import { ensureDepth } from '../../defaultOptions/UNSAFE_wechatTemplateDepth';
 import readManifest from '../../readManifest';
 import getEntries from '../../getEntries';
-import { Adapter } from '../adapters';
 import { Context } from '../../types';
 import winPath from '../../winPath';
 import { getNativeComponents } from './nativeComponents/babelPlugin';
 
-async function createTemplate(pageFile: string, adapter: Adapter) {
+function pageUID(pagePath: string) {
+  return pagePath.replace('/', '_');
+}
+
+async function createTemplate(
+  pageFile: string,
+  options: RemaxOptions,
+  meta: Meta
+) {
   const fileName = `${path.dirname(pageFile)}/${path.basename(
     pageFile,
     path.extname(pageFile)
-  )}${adapter.extensions.template.extension}`;
+  )}${meta.template.extension}`;
 
   const renderOptions: { [props: string]: any } = {
     baseTemplate: winPath(
-      path.relative(
-        path.dirname(pageFile),
-        `base${adapter.extensions.template.extension}`
-      )
+      path.relative(path.dirname(pageFile), `base${meta.template.extension}`)
     ),
   };
 
-  if (adapter.extensions.jsHelper) {
-    renderOptions.jsHelper = winPath(
-      path.relative(
-        path.dirname(pageFile),
-        `helper${adapter.extensions.jsHelper.extension}`
-      )
-    );
+  if (meta.jsHelper) {
+    renderOptions.jsHelper = `./${pageUID(pageFile)}_helper${
+      meta.jsHelper.extension
+    }`;
   }
 
   const components = sortBy(
-    getComponents(adapter).concat(Object.values(getNativeComponents())),
+    getComponents().concat(Object.values(getNativeComponents())),
     'id'
   );
 
-  const code: string = await ejs.renderFile(adapter.templates.page, {
-    ...renderOptions,
-    components,
-    adapter,
-  });
+  const hostComponents = API.getHostComponents();
+
+  let code: string = await ejs.renderFile(
+    meta.ejs.page,
+    {
+      ...renderOptions,
+      components,
+      viewComponent: {
+        props: [...new Set(hostComponents.get('view')!.props)].sort(),
+      },
+    },
+    {
+      rmWhitespace: options.compressTemplate,
+    }
+  );
+
+  // TODO 用 uglify 替代 compressTemplate
+  /* istanbul ignore next */
+  if (options.compressTemplate) {
+    code = code.replace(/^\s*$(?:\r\n?|\n)/gm, '').replace(/\r\n|\n/g, ' ');
+  }
 
   return {
     type: 'asset' as const,
@@ -54,68 +73,72 @@ async function createTemplate(pageFile: string, adapter: Adapter) {
   };
 }
 
-async function createHelperFile(adapter: Adapter) {
-  if (!adapter.extensions.jsHelper || !adapter.templates.jsHelper) {
+async function createHelperFile(pageFile: string, meta: Meta) {
+  if (!meta.jsHelper || !meta.ejs.jsHelper) {
     return null;
   }
 
-  const code: string = await ejs.renderFile(adapter.templates.jsHelper, {
-    target: adapter.name,
+  const code: string = await ejs.renderFile(meta.ejs.jsHelper, {
+    target: API.adapter.name,
   });
 
   return {
     type: 'asset' as const,
-    fileName: `helper${adapter.extensions.jsHelper.extension}`,
+    fileName: winPath(
+      path.join(
+        path.dirname(pageFile),
+        `${pageUID(pageFile)}_helper${meta.jsHelper.extension}`
+      )
+    ),
     source: code,
   };
 }
 
-async function createBaseTemplate(adapter: Adapter, options: RemaxOptions) {
-  // 支付宝小程序在 base.axml 使用不了原生小程序
-  if (!adapter.templates.base) {
+async function createBaseTemplate(options: RemaxOptions, meta: Meta) {
+  if (!meta.ejs.base) {
     return null;
   }
 
+  const hostComponents = API.getHostComponents();
+
   const components = sortBy(
-    getComponents(adapter).concat(Object.values(getNativeComponents())),
+    getComponents().concat(Object.values(getNativeComponents())),
     'id'
   );
 
   let code: string = await ejs.renderFile(
-    adapter.templates.base,
+    meta.ejs.base,
     {
       components,
-      depth: options.UNSAFE_wechatTemplateDepth,
-      adapter,
+      depth: ensureDepth(options.UNSAFE_wechatTemplateDepth),
+      viewComponent: {
+        props: [...new Set(hostComponents.get('view')!.props)].sort(),
+      },
     },
     {
-      // uglify
-      rmWhitespace: process.env.NODE_ENV === 'production',
+      rmWhitespace: options.compressTemplate,
     }
   );
 
-  // uglify
-  if (process.env.NODE_ENV === 'production') {
+  // TODO 用 uglify 替代 compressTemplate
+  /* istanbul ignore next */
+  if (options.compressTemplate) {
     code = code.replace(/^\s*$(?:\r\n?|\n)/gm, '').replace(/\r\n|\n/g, ' ');
   }
 
   return {
     type: 'asset' as const,
-    fileName: `base${adapter.extensions.template.extension}`,
+    fileName: `base${meta.template.extension}`,
     source: code,
   };
 }
 
-function createAppManifest(
-  options: RemaxOptions,
-  target: string,
-  context?: Context
-) {
+function createAppManifest(options: RemaxOptions, context?: Context) {
   const config = context
     ? { ...context.app, pages: context.pages.map(p => p.path) }
     : readManifest(
-        path.resolve(options.cwd, `${options.rootDir}/app.config.js`),
-        target
+        path.resolve(options.cwd, `${options.rootDir}/app.config`),
+        API.adapter.name
       );
   return {
     type: 'asset' as const,
@@ -124,17 +147,33 @@ function createAppManifest(
   };
 }
 
-function createPageUsingComponents(configFilePath: string) {
+function createPageUsingComponents(
+  page: any,
+  configFilePath: string,
+  options: RemaxOptions
+) {
   const nativeComponents = getNativeComponents();
   const usingComponents: { [key: string]: string } = {};
-  for (const [key, value] of Object.entries(nativeComponents)) {
-    usingComponents[value.id] = winPath(
+  for (const { id, sourcePath, pages } of nativeComponents) {
+    if (!pages.has(page)) {
+      continue;
+    }
+
+    if (sourcePath.startsWith('plugin://')) {
+      usingComponents[id] = sourcePath;
+      continue;
+    }
+
+    usingComponents[id] = winPath(
       path
         .relative(
           path.dirname(configFilePath),
-          key.replace(/node_modules/, 'src/npm')
+          sourcePath
+            .replace(/node_modules/, `${options.rootDir}/npm`)
+            .replace(/node_modules/g, 'npm')
         )
         .replace(/\.js$/, '')
+        .replace(/@/g, '_')
     );
   }
 
@@ -144,18 +183,21 @@ function createPageUsingComponents(configFilePath: string) {
 function createPageManifest(
   options: RemaxOptions,
   file: string,
-  target: string,
   page: any,
   context?: Context
 ) {
-  const configFile = file.replace(/\.(js|jsx|ts|tsx)$/, '.config.js');
+  const configFile = file.replace(/\.(js|jsx|ts|tsx)$/, '.config');
   const manifestFile = file.replace(/\.(js|jsx|ts|tsx)$/, '.json');
   const configFilePath = path.resolve(
     options.cwd,
     path.join(options.rootDir, configFile)
   );
-  const usingComponents = createPageUsingComponents(configFilePath);
-  const config = readManifest(configFilePath, target);
+  const usingComponents = createPageUsingComponents(
+    page,
+    configFilePath,
+    options
+  );
+  const config = readManifest(configFilePath, API.adapter.name);
   config.usingComponents = {
     ...(config.usingComponents || {}),
     ...usingComponents,
@@ -191,7 +233,6 @@ function isRemaxEntry(chunk: any): chunk is OutputChunk {
   }
 
   const ast: any = parse(chunk.code, {
-    ecmaVersion: 6,
     sourceType: 'module',
   });
 
@@ -214,29 +255,31 @@ function isRemaxEntry(chunk: any): chunk is OutputChunk {
 
 export default function template(
   options: RemaxOptions,
-  adapter: Adapter,
   context?: Context
 ): Plugin {
   return {
     name: 'template',
-    async generateBundle(_, bundle) {
+    async generateBundle(_, bundle, isWrite) {
+      const meta = API.getMeta();
       const templateAssets = [];
       // app.json
-      const manifest = createAppManifest(options, adapter.name, context);
-      const template = await createBaseTemplate(adapter, options);
+      const manifest = createAppManifest(options, context);
 
-      templateAssets.push(manifest);
+      if (
+        this.cache.get(manifest.fileName)?.toString() !==
+        manifest.source.toString()
+      ) {
+        this.cache.set(manifest.fileName, manifest.source);
+        templateAssets.push(manifest);
+      }
+
+      const template = await createBaseTemplate(options, meta);
 
       if (template) {
         templateAssets.push(template);
       }
 
-      const helperFile = await createHelperFile(adapter);
-      if (helperFile) {
-        templateAssets.push(helperFile);
-      }
-
-      const entries = getEntries(options, adapter, context);
+      const entries = getEntries(options, context);
       const { pages } = entries;
 
       const files = Object.keys(bundle);
@@ -245,19 +288,26 @@ export default function template(
           const chunk = bundle[file];
           if (isRemaxEntry(chunk)) {
             const filePath = Object.keys(chunk.modules)[0];
-            const page = pages.find(p => p.file === filePath);
+            const page = pages.find(p => p === filePath);
             if (page) {
-              const template = await createTemplate(file, adapter);
+              const template = await createTemplate(file, options, meta);
               templateAssets.push(template);
-              const config = createPageManifest(
-                options,
-                file,
-                adapter.name,
-                page,
-                context
-              );
+
+              const config = createPageManifest(options, file, page, context);
+
+              const helperFile = await createHelperFile(file, meta);
+              if (helperFile) {
+                templateAssets.push(helperFile);
+              }
 
               if (config) {
+                if (
+                  this.cache.get(file)?.toString() === config.source.toString()
+                ) {
+                  return;
+                }
+                this.cache.set(file, config.source);
+
                 templateAssets.push(config);
               }
             }

@@ -3,7 +3,7 @@ import Container from './Container';
 
 export interface RawNode {
   id?: number;
-  type: string | symbol;
+  type: string;
   props?: any;
   children?: RawNode[];
   text?: string;
@@ -16,7 +16,7 @@ export default class VNode {
   container: Container;
   children: VNode[];
   mounted = false;
-  type: string | symbol;
+  type: string;
   props?: any;
   parent: VNode | null = null;
   text?: string;
@@ -28,7 +28,7 @@ export default class VNode {
     container,
   }: {
     id: number;
-    type: string | symbol;
+    type: string;
     props?: any;
     container: any;
   }) {
@@ -41,6 +41,10 @@ export default class VNode {
 
   appendChild(node: VNode, immediately: boolean) {
     node.parent = this;
+    if (this.children.find(child => child.id === node.id)) {
+      this.removeChild(node, immediately);
+    }
+
     this.children.push(node);
     if (this.isMounted()) {
       this.container.requestUpdate(
@@ -68,6 +72,10 @@ export default class VNode {
 
   insertBefore(newNode: VNode, referenceNode: VNode, immediately: boolean) {
     newNode.parent = this;
+    if (this.children.find(child => child.id === newNode.id)) {
+      this.removeChild(newNode, immediately);
+    }
+
     const start = this.children.indexOf(referenceNode);
     this.children.splice(start, 0, newNode);
     if (this.isMounted()) {

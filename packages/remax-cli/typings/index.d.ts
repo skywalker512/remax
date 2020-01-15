@@ -1,13 +1,9 @@
 declare module 'rollup-plugin-babel';
 declare module '@remax/rollup-plugin-postcss';
-declare module 'rollup-plugin-json';
-declare module 'rollup-plugin-node-resolve';
 declare module 'rollup-plugin-progress';
 declare module 'rollup-plugin-delete';
-declare module 'rollup-plugin-alias';
-declare module 'rollup-plugin-inject';
-declare module 'rollup-plugin-url';
-declare module 'rollup-plugin-typescript';
+declare module '@rollup/plugin-alias';
+declare module '@remax/rollup-plugin-url';
 declare module 'postcss-url';
 declare module 'mkdirp';
 declare module '@remax/postcss-px2units';
@@ -21,7 +17,7 @@ declare module 'sander';
 declare module 'acorn-jsx';
 
 declare namespace jest {
-  interface Matchers<R> {
+  interface Matchers<R, T> {
     toMatchOutput: (output: string) => R;
   }
 }

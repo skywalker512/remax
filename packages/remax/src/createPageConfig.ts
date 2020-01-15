@@ -11,11 +11,14 @@ export default function createPageConfig(Page: React.ComponentType<any>) {
   const id = idCounter;
   idCounter += 1;
 
-  return {
+  const config = {
     pageId: 'page_' + id,
 
     data: {
       action: {},
+      root: {
+        children: [],
+      },
     },
 
     wrapperRef: React.createRef<any>(),
@@ -24,6 +27,7 @@ export default function createPageConfig(Page: React.ComponentType<any>) {
 
     onLoad(this: any, query: any) {
       const PageWrapper = createPageWrapper(Page, query);
+      this.query = query;
       this.container = new Container(this);
       this.element = createPortal(
         React.createElement(PageWrapper, {
@@ -96,8 +100,8 @@ export default function createPageConfig(Page: React.ComponentType<any>) {
       return this.callLifecycle(Lifecycle.reachBottom);
     },
 
-    onPageScroll() {
-      return this.callLifecycle(Lifecycle.pageScroll);
+    onPageScroll(e: any) {
+      return this.callLifecycle(Lifecycle.pageScroll, e);
     },
 
     onShareAppMessage(options: any) {
@@ -149,4 +153,6 @@ export default function createPageConfig(Page: React.ComponentType<any>) {
      * lifecycle end
      */
   };
+
+  return config;
 }

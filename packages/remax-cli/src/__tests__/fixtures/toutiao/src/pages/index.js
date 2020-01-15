@@ -1,11 +1,14 @@
 import * as React from 'react';
 import { View, Text } from 'remax/toutiao';
+import { FunctionalPageNavigator as UnknownComponent } from 'remax/wechat';
 
 export default () => {
   const props = {};
   const TextElement = React.cloneElement(<Text />);
 
-  function handleClick() {}
+  async function handleClick() {
+    await Promise.resolve();
+  }
 
   function handleTouchStart() {}
 
@@ -21,6 +24,8 @@ export default () => {
         foo
       </View>
       {TextElement}
+      <UnknownComponent />
+      <UnBindingComponent />
     </View>
   );
 };

@@ -2,49 +2,43 @@ import fs from 'fs';
 import path from 'path';
 import esm from 'esm';
 import defaultOptions from './defaultOptions';
-import { PluginImpl, RollupOptions } from 'rollup';
-
-export interface RemaxOptions {
-  cssModules: boolean | RegExp;
-  cwd: string;
-  progress: boolean;
-  output: string;
-  rootDir: string;
-  UNSAFE_wechatTemplateDepth: number;
-  alias?: {
-    [key: string]: string;
-  };
-  postcss?: {
-    options?: {
-      [key: string]: any;
-    };
-    plugins?: PluginImpl[];
-  };
-  rollupOptions?: RollupOptions;
-}
+import { RemaxOptions } from 'remax-types';
+import validateOptions from 'schema-utils';
+import schema from './RemaxOptionsSchema.json';
 
 export interface CliOptions {
   target: string;
 }
 
-// eslint-disable-next-line
-require = esm(module, {
-  cjs: {
-    dedefault: true,
-  },
-});
+function readJavascriptConfig(path: string) {
+  // eslint-disable-next-line
+  require = esm(module, {
+    cjs: {
+      dedefault: true,
+    },
+  });
+  delete require.cache[require.resolve(path)];
+  const config = require(path);
 
-export default function getConfig(): RemaxOptions {
-  const configPath: string = path.join(process.cwd(), './remax.config.js');
-  if (fs.existsSync(configPath)) {
-    delete require.cache[require.resolve(configPath)];
-    // eslint-disable-next-line
-    const options = require(configPath);
+  return config || {};
+}
 
-    return {
-      ...defaultOptions,
-      ...options,
-    };
+export default function getConfig(validate = true): RemaxOptions {
+  const configPath: string = path.join(process.cwd(), './remax.config');
+  let options = {};
+
+  if (fs.existsSync(configPath + '.js')) {
+    options = readJavascriptConfig(configPath + '.js');
   }
-  return defaultOptions;
+
+  if (validate) {
+    validateOptions(schema as any, options, {
+      name: 'remax',
+    });
+  }
+
+  return {
+    ...defaultOptions,
+    ...options,
+  };
 }

@@ -1,4 +1,4 @@
-import { RemaxOptions } from './getConfig';
+import { RemaxOptions } from 'remax-types';
 
 export interface Context {
   config: RemaxOptions;
@@ -6,5 +6,5 @@ export interface Context {
   pages: Array<{ path: string; [key: string]: any }>;
 }
 export interface Env {
-  [key: string]: string | undefined;
+  [key: string]: string | Function | undefined;
 }

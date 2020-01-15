@@ -539,10 +539,11 @@ img {
 }
 /* end image */
 .githubBtn {
-  display: flex;
+  display: flex !important;
   align-items: center;
   font-size: 16px;
   padding: 10px 15px 2px;
+  height: 46px;
 }
 
 .communitySection {
@@ -648,4 +649,8 @@ img {
     text-align: left !important;
     padding-left: 0 !important;
   }
+}
+
+.badges a:not(:last-child) {
+  margin-right: 8px;
 }
