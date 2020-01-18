@@ -23,7 +23,7 @@ export const alias = {
   onGetUserinfo: 'bindgetuserinfo',
   onGetUserInfo: 'bindgetuserinfo',
   onContact: 'bindcontact',
-  onGetPhoneMumber: 'bindgetphonenumber',
+  onGetPhoneNumber: 'bindgetphonenumber',
   onError: 'binderror',
   onOpenSetting: 'bindopensetting',
   onLaunchApp: 'bindlaunchapp',
