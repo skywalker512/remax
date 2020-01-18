@@ -37,6 +37,7 @@
     "remax-alipay": "^1.11.4",
     "remax-toutiao": "^1.11.4",
     "remax-wechat": "^1.11.4",
+    "remax-qq": "^1.11.4",
     "remax.macro": "^1.11.4",
     "scheduler": "0.18.0"
   },
