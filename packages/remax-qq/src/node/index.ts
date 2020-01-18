@@ -26,6 +26,7 @@ const plugin: RemaxNodePluginConstructor = () => {
         base: path.join(EJS_TPL_ROOT, 'base.ejs'),
         page: path.join(EJS_TPL_ROOT, 'page.ejs'),
         jsHelper: path.join(EJS_TPL_ROOT, 'helper.js'),
+        baseJs: path.join(EJS_TPL_ROOT, 'base.js'),
       },
     },
     hostComponents,

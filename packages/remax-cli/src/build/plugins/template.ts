@@ -73,6 +73,19 @@ async function createTemplate(
   };
 }
 
+async function createBaseJsFile(meta: Meta) {
+  if (!meta.ejs.baseJs) {
+    return null;
+  }
+
+  const code: string = await ejs.renderFile(meta.ejs.baseJs);
+  return {
+    type: 'asset' as const,
+    fileName: `base${meta.jsHelper!.extension}`,
+    source: code,
+  };
+}
+
 async function createHelperFile(pageFile: string, meta: Meta) {
   if (!meta.jsHelper || !meta.ejs.jsHelper) {
     return null;
@@ -279,6 +292,10 @@ export default function template(
         templateAssets.push(template);
       }
 
+      const jsFile = await createBaseJsFile(meta);
+      if (jsFile) {
+        templateAssets.push(jsFile);
+      }
       const entries = getEntries(options, context);
       const { pages } = entries;
 

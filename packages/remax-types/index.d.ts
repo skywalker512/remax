@@ -92,6 +92,7 @@ export type Meta = {
     src: string;
   };
   ejs: {
+    baseJs?: string;
     base?: string;
     page: string;
     jsHelper?: string;
