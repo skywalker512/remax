@@ -1,6 +1,6 @@
 {
   "name": "remax-wechat",
-  "version": "1.11.1",
+  "version": "1.11.4",
   "description": "Remax for Wechat",
   "main": "./cjs/index.js",
   "esnext": "./esm/index.js",
@@ -15,15 +15,17 @@
   },
   "repository": "git+https://github.com/remaxjs/remax.git",
   "license": "MIT",
+  "dependencies": {
+    "@remax/miniprogram-api-typings": "^2.9.3"
+  },
   "devDependencies": {
-    "@remax/miniprogram-api-typings": "^2.9.3",
     "@types/jest": "^24.0.24",
     "@types/react": "^16.9.17",
     "@types/react-test-renderer": "^16.9.1",
     "jest": "^24.9.0",
     "react": "^16.12.0",
     "react-test-renderer": "^16.12.0",
-    "remax-types": "^1.11.1",
+    "remax-types": "^1.11.4",
     "ts-jest": "^24.2.0",
     "typescript": "^3.7.4"
   }
