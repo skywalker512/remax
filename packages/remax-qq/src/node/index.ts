@@ -8,14 +8,14 @@ const plugin: RemaxNodePluginConstructor = () => {
   return {
     meta: {
       template: {
-        extension: '.wxml',
+        extension: '.qml',
         tag: 'import',
         src: 'src',
       },
-      style: '.wxss',
+      style: '.qss',
       jsHelper: {
-        extension: '.wxs',
-        tag: 'wxs',
+        extension: '.qs',
+        tag: 'qs',
         src: 'src',
       },
       include: {

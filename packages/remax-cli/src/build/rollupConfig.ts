@@ -42,7 +42,7 @@ export default function rollupConfig(
 ) {
   const stubModules: string[] = [];
 
-  ['wechat', 'alipay', 'toutiao'].forEach(name => {
+  ['wechat', 'alipay', 'toutiao', 'qq'].forEach(name => {
     if (API.adapter.name !== name) {
       stubModules.push(`${name}/esm/api`);
       stubModules.push(`${name}/esm/hostComponents`);

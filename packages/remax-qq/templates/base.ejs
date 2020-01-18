@@ -1,5 +1,5 @@
 <template name="REMAX_TPL">
-	<block wx:for="{{tree.root.children}}" wx:key="id">
+	<block qq:for="{{tree.root.children}}" qq:key="id">
 		<template is="REMAX_TPL_1_CONTAINER" data="{{i: item, a: ''}}" />
 	</block>
 </template>
@@ -13,7 +13,7 @@
 		tid: function (type, ancestor) {
 			var items = ancestor.split(',');
 			var depth = 1;
-		
+
 			for (var i = 0; i < items.length; i++) {
 				if (type === items[i]) {
 					depth = depth + 1;
