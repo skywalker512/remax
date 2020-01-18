@@ -1,6 +1,6 @@
 {
   "name": "remax-qq",
-  "version": "1.11.4",
+  "version": "1.11.5",
   "description": "Remax for qq",
   "main": "./cjs/index.js",
   "esnext": "./esm/index.js",

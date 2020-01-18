@@ -1,3 +1,5 @@
+/// <reference path="../../typings/index.d.ts" />
+
 import promisify from './promisify';
 
 export const getAppStub = getApp;
@@ -262,8 +264,6 @@ export const scanCode = promisify(qq.scanCode);
 export const vibrateShort = promisify(qq.vibrateShort);
 export const vibrateLong = promisify(qq.vibrateLong);
 export const createWorker = qq.createWorker;
-export const getExtConfigSync = qq.getExtConfigSync;
-export const getExtConfig = promisify(qq.getExtConfig);
 export const createSelectorQuery = qq.createSelectorQuery;
 export const createIntersectionObserver = qq.createIntersectionObserver;
 export const createRewardedVideoAd = qq.createRewardedVideoAd;
