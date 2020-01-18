@@ -9,7 +9,7 @@
   "private": false,
   "scripts": {
     "watch": "tsc -w",
-    "prebuild": "rm -rf lib",
+    "prebuild": "rimraf lib",
     "build": "tsc"
   },
   "bugs": {

@@ -44,7 +44,8 @@
     }
   },
   "devDependencies": {
-    "lint-staged": ">=8"
+    "lint-staged": ">=8",
+    "rimraf": "^3.0.0"
   },
   "collective": {
     "type": "opencollective",
