@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.12.3](https://github.com/remaxjs/remax/compare/v1.12.2...v1.12.3) (2020-01-21)
+
+**Note:** Version bump only for package remax
+
+## [1.12.2](https://github.com/remaxjs/remax/compare/v1.12.1...v1.12.2) (2020-01-19)
+
+### Bug Fixes
+
+- 修复 api 类型丢失的问题 ([ed7a77b](https://github.com/remaxjs/remax/commit/ed7a77b)), closes [#598](https://github.com/remaxjs/remax/issues/598)
+- 修复配置 pxToRpx 不生效的问题 ([2c93e21](https://github.com/remaxjs/remax/commit/2c93e21))
+
+## [1.12.1](https://github.com/remaxjs/remax/compare/v1.12.0...v1.12.1) (2020-01-19)
+
+**Note:** Version bump only for package remax
+
+# [1.12.0](https://github.com/remaxjs/remax/compare/v1.11.5...v1.12.0) (2020-01-19)
+
+### Features
+
+- 支持通过 .env 文件设置环境变量 ([3b3497f](https://github.com/remaxjs/remax/commit/3b3497f))
+
 ## [1.11.5](https://github.com/remaxjs/remax/compare/v1.11.4...v1.11.5) (2020-01-18)
 
 **Note:** Version bump only for package remax

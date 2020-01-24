@@ -18,7 +18,7 @@ require('../npm/remax/npm/remax-alipay/esm/hostComponents/MovableArea/index.js')
 require('../npm/remax/npm/remax-alipay/esm/hostComponents/CoverView/index.js');
 require('../npm/remax/npm/remax-alipay/esm/hostComponents/CoverImage/index.js');
 require('../npm/remax/npm/remax-alipay/esm/hostComponents/Icon/index.js');
-require('../npm/remax/npm/remax-alipay/esm/hostComponents/Text/index.js');
+var index$b = require('../npm/remax/npm/remax-alipay/esm/hostComponents/Text/index.js');
 require('../npm/remax/npm/remax-alipay/esm/hostComponents/RichText/index.js');
 require('../npm/remax/npm/remax-alipay/esm/hostComponents/Progress/index.js');
 require('../npm/remax/npm/remax-alipay/esm/hostComponents/Button/index.js');
@@ -45,12 +45,9 @@ require('../npm/remax/npm/remax-alipay/esm/hostComponents/ContactButton/index.js
 require('../npm/remax/npm/remax-alipay/esm/hostComponents/Video/index.js');
 require('../npm/remax/npm/remax-alipay/esm/api/index.js');
 
-console.log(false);
-
 var _page = function _page() {
-  return React.createElement(index$2.default, {
-    className: "foo"
-  }, "foo");
+
+  return React.createElement(index$2.default, null, React.createElement(index$b.default, null, "test"), React.createElement(index$b.default, null, "hello"), React.createElement(index$b.default, null, "hello world"));
 };
 
 var index = Page(createPageConfig.default(_page));
